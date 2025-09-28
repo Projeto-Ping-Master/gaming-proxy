@@ -1,0 +1,36 @@
+{
+  "name": "@gaming-proxy/node-server",
+  "version": "1.0.0",
+  "description": "Gaming Proxy Node Relay Server",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@gaming-proxy/shared": "*",
+    "fastify": "^4.21.0",
+    "@fastify/websocket": "^8.3.1",
+    "@fastify/cors": "^8.3.0",
+    "ws": "^8.13.0",
+    "dgram": "^1.0.1",
+    "net": "^1.0.2",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1",
+    "pino": "^8.15.0",
+    "node-cron": "^3.0.2",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/ws": "^8.5.5",
+    "@types/node-cron": "^3.0.8",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6",
+    "jest": "^29.6.2",
+    "@types/jest": "^29.5.3"
+  }
+}

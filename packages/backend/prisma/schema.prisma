@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  passwordHash String   @map("password_hash")
+  verified    Boolean  @default(false)
+  verificationToken String? @map("verification_token")
+  resetToken  String?  @map("reset_token")
+  resetTokenExpires DateTime? @map("reset_token_expires")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subscriptions Subscription[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  plan      String   // trial, monthly, quarterly, annual
+  status    String   // active, inactive, cancelled, past_due
+  stripeId  String   @map("stripe_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Server {
+  id       String @id @default(uuid())
+  region   String
+  ip       String
+  port     Int    @default(8080)
+  capacity Int    @default(1000)
+  weight   Int    @default(100)
+  status   String @default("online") // online, offline, maintenance
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  sessions Session[]
+
+  @@map("servers")
+}
+
+model Game {
+  gameId          String   @id @map("game_id")
+  name            String
+  processKeywords String[] @map("process_keywords")
+  defaultPorts    Int[]    @map("default_ports")
+  icon            String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  sessions Session[]
+
+  @@map("games")
+}
+
+model Session {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  serverId    String    @map("server_id")
+  nodeId      String    @map("node_id")
+  gameId      String    @map("game_id")
+  startAt     DateTime  @default(now()) @map("start_at")
+  endAt       DateTime? @map("end_at")
+  metricsJson String?   @map("metrics_json")
+  status      String    @default("active") // active, ended, error
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server Server @relation(fields: [serverId], references: [id])
+  game   Game   @relation(fields: [gameId], references: [gameId])
+
+  @@map("sessions")
+}
+
+model NodeServer {
+  id            String   @id @default(uuid())
+  region        String
+  ip            String
+  port          Int      @default(8080)
+  load          Float    @default(0)
+  connections   Int      @default(0)
+  status        String   @default("healthy") // healthy, degraded, unhealthy
+  lastHeartbeat DateTime @default(now()) @map("last_heartbeat")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("node_servers")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("refresh_tokens")
+}
